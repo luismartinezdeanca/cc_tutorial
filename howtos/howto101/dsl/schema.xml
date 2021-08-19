@@ -13,6 +13,7 @@
 
   <interface name="Interface" description="Common Interface for all the messages.">
     <ref field="FlagField"/>
+    <ref field="ChecksumField"/>
   </interface>
 
   <frame name="Frame">
