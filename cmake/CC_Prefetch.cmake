@@ -13,7 +13,7 @@
 #
 
 set (CC_FETCH_DEFAULT_REPO "https://github.com/commschamp/comms_champion.git")
-set (CC_FETCH_DEFAULT_TAG "master")
+set (CC_FETCH_DEFAULT_TAG "develop")
 
 function (cc_prefetch)
     set (_prefix CC_FETCH)

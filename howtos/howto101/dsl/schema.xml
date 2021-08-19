@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema name="howto101" endian="big">
+  <fields>
+    <string name="MSG1Name" defaultValue="MSG1" />
+
+    <int name="FlagField" type="uint8" />
+    <int name="ChecksumField" type="uint64" />
+
+    <enum name="PacketTypeField" type="uint8" semanticType="messageId" >
+      <validValue name="MSG1PacketType" val="1" displayName="^MSG1Name" />
+    </enum>
+</fields>
+
+  <interface name="Interface" description="Common Interface for all the messages.">
+    <ref field="FlagField"/>
+  </interface>
+
+  <frame name="Frame">
+    <size name="PacketLength">
+      <int name="PacketLengthField" type="uint16" />
+    </size>
+
+    <value name="Flag">
+      <interfaceFieldName value="FlagField" />
+        <field>
+          <ref field="FlagField" />
+        </field>
+    </value>
+
+    <id name="PacketType">
+      <field>
+        <ref field="PacketTypeField"/>
+      </field>
+    </id>
+
+    <payload name="UserData" />
+
+    <custom name="Checksum">
+      <optional name="Optional" field="ChecksumField" defaultMode="exist"/>
+    </custom>
+  </frame>
+
+  <message name="MSG1" id="PacketTypeField.MSG1PacketType" displayName="^MSG1Name">
+    <int name="uint1" type="uint32" />
+    <int name="uint2" type="uint32" />
+  </message>
+
+</schema>

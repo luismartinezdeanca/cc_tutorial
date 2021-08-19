@@ -14,11 +14,11 @@ option (USE_SANITIZERS "Compile with sanitizers." OFF)
 # CC_TAG - Tag / branch of comms_champion project (if built internally)
 
 if ("${COMMSDSL_TAG}" STREQUAL "")
-    set (COMMSDSL_TAG "v3.6.4")
+    set (COMMSDSL_TAG "v3.6.3")
 endif ()
 
 if ("${CC_TAG}" STREQUAL "")
-    set (CC_TAG "v3.4")
+    set (CC_TAG "develop")
 endif ()
 
 if (NOT CMAKE_CXX_STANDARD)
@@ -62,9 +62,7 @@ if ("${CC_MAIN_INSTALL_DIR}" STREQUAL "")
         BUILD_DIR ${cc_bin_dir}
         TAG ${CC_TAG}
         CMAKE_ARGS
-            -DCC_BUILD_UNIT_TESTS=OFF 
-            -DCC_BUILD_TOOLS_LIBRARY=OFF
-            -DCC_CC_BUILD_TOOLS=OFF 
+            -DCC_COMMS_LIB_ONLY=ON -DCC_NO_UNIT_TESTS=ON
             -DCMAKE_INSTALL_PREFIX=${CC_MAIN_INSTALL_DIR}
     )
 
@@ -273,6 +271,6 @@ endfunction ()
 #######################################################
 
 add_subdirectory (lib)
-add_subdirectory (tutorials)
+#add_subdirectory (tutorials)
 add_subdirectory (howtos)
 
