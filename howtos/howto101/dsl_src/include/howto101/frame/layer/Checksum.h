@@ -70,6 +70,44 @@ public:
         return nextLayerReader.read(msg, iter, size, extraValues...);
     }
 
+    template<
+        typename TMsg, 
+        typename TIter, 
+        typename TNextLayerWriter>
+    comms::ErrorStatus doWrite(
+        Field& field, 
+        const TMsg& msg, 
+        TIter& iter, 
+        std::size_t size, 
+        TNextLayerWriter&& nextLayerWriter) const
+    {
+        // TODO: Analyze message ID and decide whether to have the checksum
+        auto id = msg.getId();
+        static_cast<void>(id);
+        bool hasChecksum = false;
+        if (hasChecksum) {
+            return Base::doWrite(field, msg, iter, size, std::forward<TNextLayerWriter>(nextLayerWriter));
+        }
+
+        // Skip the read of current layer and forward it no the next
+        // The signature is the same as write() operation of the layer
+        return nextLayerWriter.write(msg, iter, size);
+    }
+
+    template <typename TMsg>
+    std::size_t doFieldLength(const TMsg& msg) const
+    {
+        // TODO: Analyze message ID and decide whether to have the checksum
+        auto id = msg.getId();
+        static_cast<void>(id);
+        bool hasChecksum = false;
+        if (hasChecksum) {
+            return Base::doFieldLength(msg);
+        }
+
+        return 0U;
+    }
+
     // Allow update of the flags from outer layers
     void setChecksumExists(bool value)
     {

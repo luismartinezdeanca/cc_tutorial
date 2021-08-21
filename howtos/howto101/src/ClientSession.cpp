@@ -62,15 +62,20 @@ void ClientSession::sendMessage(const Message& msg)
     auto writeIter = std::back_inserter(output);
 
     auto es = m_frame.write(msg, writeIter, output.max_size());
+
+    // When checksum is skipped, the comms::ErrorStatus::Success may be returned immediately
     if (es == comms::ErrorStatus::UpdateRequired) {
        auto updateIter = &output[0];
        es = m_frame.update(msg, updateIter, output.size());
-
-       // Send serialized message back
-       sendOutput(&output[0], output.size());
-        
-       std::cout << msg.name() << " sent succesfully (" << output.size() << " bytes)\n";
     }
+
+    if (es != comms::ErrorStatus::Success) {
+        std::cerr << "ERROR: Failed to serialize the message" << std::endl;
+    }
+
+    // Send serialized message back
+    sendOutput(&output[0], output.size());
+    std::cout << msg.name() << " sent succesfully (" << output.size() << " bytes)\n";
 
     //for (const auto& b: output)
     //  std::cout << b << std::endl;
