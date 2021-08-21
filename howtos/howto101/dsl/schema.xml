@@ -13,7 +13,6 @@
 
   <interface name="Interface" description="Common Interface for all the messages.">
     <ref field="FlagField"/>
-    <ref field="ChecksumField"/>
   </interface>
 
   <frame name="Frame">
@@ -21,24 +20,15 @@
       <int name="PacketLengthField" type="uint16" />
     </size>
 
-    <value name="Flag">
-      <interfaceFieldName value="FlagField" />
-        <field>
-          <ref field="FlagField" />
-        </field>
-    </value>
+    <custom name="PacketType" idReplacement="true"> 
+        <bitfield name="Field">
+            <ref field="PacketTypeField" bitLength="6" />
+            <ref field="FlagField" bitLength="2" />
+        </bitfield>
+    </custom>    
 
-    <id name="PacketType">
-      <field>
-        <ref field="PacketTypeField"/>
-      </field>
-    </id>
-
+    <custom name="Checksum" field="ChecksumField" />
     <payload name="UserData" />
-
-    <custom name="Checksum">
-      <optional name="Optional" field="ChecksumField" defaultMode="exist"/>
-    </custom>
   </frame>
 
   <message name="MSG1" id="PacketTypeField.MSG1PacketType" displayName="^MSG1Name">
