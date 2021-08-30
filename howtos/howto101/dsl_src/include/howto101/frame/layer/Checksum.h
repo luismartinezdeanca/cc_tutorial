@@ -4,8 +4,8 @@
 
 #include "comms/protocol/ChecksumLayer.h"
 #include "comms/options.h"
-#include "comms/protocol/checksum/BasicSum.h"
-#include "comms/protocol/checksum/Crc.h"
+
+#include "howto101/MsgId.h"
 
 #include <iostream>
 
@@ -17,12 +17,32 @@ namespace frame
 
 namespace layer
 {
+
+struct CustomChecksum
+{
+    template <typename TIter>
+    std::uint64_t operator()(TIter& iter, std::size_t len) const
+    {
+        // TODO: proper calculation
+        std::advance(iter, len);
+        return 0xdeadbeef;
+    }
+
+    template <typename TIter>
+    static std::uint64_t specialChecksum(TIter& iter, std::size_t len)
+    {
+        // TODO: proper calculation
+        std::advance(iter, len);
+        return 0xfeebdaed;
+    }
+};
+
 /// @brief Customizing the ChecksumLayer
 template<typename TField, typename TNextLayer, typename... TOptions>
 class Checksum : public
     comms::protocol::ChecksumLayer<
     TField,
-    comms::protocol::checksum::BasicSum<std::uint64_t>, 
+    CustomChecksum, 
     TNextLayer,
     TOptions...,
     comms::option::def::ChecksumLayerVerifyBeforeRead,
@@ -33,7 +53,7 @@ class Checksum : public
   using Base =
       comms::protocol::ChecksumLayer <
           TField,
-          comms::protocol::checksum::BasicSum<std::uint64_t>, 
+          CustomChecksum, 
           TNextLayer,
           TOptions...,
           comms::option::def::ChecksumLayerVerifyBeforeRead,
@@ -60,7 +80,11 @@ public:
         TNextLayerReader&& nextLayerReader, 
         TExtraValues... extraValues)
     {
-        if (m_checksumExists) {
+        assert(msg); // message object has been created
+
+        bool hasChecksum = msg->getId() != howto101::MsgId_MSG1PacketType;
+        
+        if (hasChecksum) {
             // Perform the read
             return Base::doRead(field, msg, iter, size, std::forward<TNextLayerReader>(nextLayerReader), extraValues...);
         }
@@ -84,7 +108,7 @@ public:
         // TODO: Analyze message ID and decide whether to have the checksum
         auto id = msg.getId();
         static_cast<void>(id);
-        bool hasChecksum = false;
+        bool hasChecksum = id != howto101::MsgId_MSG1PacketType;
         if (hasChecksum) {
             return Base::doWrite(field, msg, iter, size, std::forward<TNextLayerWriter>(nextLayerWriter));
         }
@@ -100,7 +124,7 @@ public:
         // TODO: Analyze message ID and decide whether to have the checksum
         auto id = msg.getId();
         static_cast<void>(id);
-        bool hasChecksum = false;
+        bool hasChecksum = id != howto101::MsgId_MSG1PacketType;
         if (hasChecksum) {
             return Base::doFieldLength(msg);
         }
@@ -108,14 +132,26 @@ public:
         return 0U;
     }
 
-    // Allow update of the flags from outer layers
-    void setChecksumExists(bool value)
+    template <typename TMsg, typename TIter>
+    typename Field::ValueType calculateChecksum(
+        const TMsg* msg,
+		TIter& iter,
+		std::size_t len,
+		bool& checksumValid) const
     {
-        m_checksumExists = value;
-    }
+        assert(msg != nullptr); // Message object must exist
+        auto id = msg->getId();
+        assert(id != howto101::MsgId_MSG1PacketType);
 
-private:
-    bool m_checksumExists = true;
+        if (id != howto101::MsgId_MSG2PacketType) {
+            // Invoke default calculation
+            return Base::calculateChecksum(msg, iter, len, checksumValid);
+        }
+
+        // Use special calculation for Msg2 only
+        checksumValid = true;
+        return CustomChecksum::specialChecksum(iter, len);
+    }
 };
 
 }

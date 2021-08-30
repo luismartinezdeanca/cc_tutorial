@@ -2,12 +2,16 @@
 <schema name="howto101" endian="big">
   <fields>
     <string name="MSG1Name" defaultValue="MSG1" />
+    <string name="MSG2Name" defaultValue="MSG2" />
+    <string name="MSG3Name" defaultValue="MSG3" />
 
     <int name="FlagField" type="uint8" />
     <int name="ChecksumField" type="uint64" />
 
     <enum name="PacketTypeField" type="uint8" semanticType="messageId" >
       <validValue name="MSG1PacketType" val="1" displayName="^MSG1Name" />
+      <validValue name="MSG2PacketType" val="2" displayName="^MSG2Name" />
+      <validValue name="MSG3PacketType" val="3" displayName="^MSG3Name" />
     </enum>
 </fields>
 
@@ -34,6 +38,14 @@
   <message name="MSG1" id="PacketTypeField.MSG1PacketType" displayName="^MSG1Name">
     <int name="uint1" type="uint32" />
     <int name="uint2" type="uint32" />
+  </message>
+
+  <message name="MSG2" id="PacketTypeField.MSG2PacketType" displayName="^MSG2Name">
+    <int name="uint1" type="uint32" />
+  </message>
+
+  <message name="MSG3" id="PacketTypeField.MSG3PacketType" displayName="^MSG3Name">
+    <int name="uint1" type="uint32" />
   </message>
 
 </schema>

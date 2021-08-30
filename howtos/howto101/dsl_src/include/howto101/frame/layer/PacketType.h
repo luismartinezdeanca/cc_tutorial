@@ -48,10 +48,6 @@ public:
     MsgIdType getMsgIdFromField(const Field& field)
     {
         auto id = field.field_packetTypeField().value();
-
-        // TODO: Use your code to analyze the presence of the checksum and upate
-        // its flag accordingly
-        Base::nextLayer().setChecksumExists(false);
         return id;
     }
 

@@ -23,6 +23,34 @@ void ClientSession::handle(Msg1& msg)
     doNextStage();
 }
 
+void ClientSession::handle(Msg2& msg)
+{
+    std::cout << "Received message \"" << msg.doName() << "\" with ID=" << (unsigned)msg.doGetId() << '\n';
+    //printIntField(msg.field_f1());
+    std::cout << std::endl;
+
+    if (m_currentStage != CommsStage_Msg2) {
+        std::cerr << "ERROR: Unexpected stage" << std::endl;
+        return;
+    }
+
+    doNextStage();
+}
+
+void ClientSession::handle(Msg3& msg)
+{
+    std::cout << "Received message \"" << msg.doName() << "\" with ID=" << (unsigned)msg.doGetId() << '\n';
+    //printIntField(msg.field_f1());
+    std::cout << std::endl;
+
+    if (m_currentStage != CommsStage_Msg3) {
+        std::cerr << "ERROR: Unexpected stage" << std::endl;
+        return;
+    }
+
+    doNextStage();
+}
+
 void ClientSession::handle(Message& msg)
 {
     std::cerr << "ERROR: Received unexpected message \"" << msg.name() << " with ID=" << (unsigned)msg.getId() << std::endl;
@@ -106,6 +134,8 @@ void ClientSession::doNextStage()
     using NextSendFunc = void (ClientSession::*)();
     static const NextSendFunc Map[] = {
         /* CommsStage_Msg1 */ &ClientSession::sendMsg1,
+        /* CommsStage_Msg2 */ &ClientSession::sendMsg2,
+        /* CommsStage_Msg3 */ &ClientSession::sendMsg3,
     };
     static const std::size_t MapSize = std::extent<decltype(Map)>::value;
     static_assert(MapSize == CommsStage_NumOfValues, "Invalid Map");
@@ -121,16 +151,24 @@ void ClientSession::sendMsg1()
     msg.transportField_flagField().value() = 1;
     msg.field_uint1().value() = 1;
     msg.field_uint2().value() = 2;
-//    assert(msg.field_f3().isMissing()); // F3 is missing when default constructed
+    sendMessage(msg);
+}
 
-//    msg.field_f1().value() = 1111;
-//    msg.field_f2().value() = 2222;
-//    msg.field_f3().field().value() = 1234;
-//    msg.transportField_flags().setBitValue_B0(true);
+void ClientSession::sendMsg2()
+{
+    Msg2 msg;
 
-    msg.doRefresh(); // Bring everything into consistent state
-//    assert(msg.field_f3().doesExist()); // F3 must exist after refresh
-    
+    msg.transportField_flagField().value() = 1;
+    msg.field_uint1().value() = 3;
+    sendMessage(msg);
+}
+
+void ClientSession::sendMsg3()
+{
+    Msg3 msg;
+
+    //msg.transportField_flagField().value() = 1;
+    msg.field_uint1().value() = 4;
     sendMessage(msg);
 }
 
